@@ -31,15 +31,15 @@ export const CommanderAria: React.FC<CommanderAriaProps> = ({
       : '#00F0FF';
 
   const defaultSpeech = isCadet
-    ? `Hey Cadet! Commander Aria here for Sol ${currentSol}. Remember: Outpost Zero is like a giant space submarine. If you turn on all the heaters and drills at once, our battery will go dead before morning!`
-    : `Flight Director: Outpost Zero telemetry synchronized for Sol ${currentSol}. Monitor thermal conduction loss against NASA-STD-3001 cabin constraints and ensure WRS recycling operates above 80% baseline efficiency.`;
+    ? `Hey Cadet! Commander Aria here for Sol ${currentSol}. Remember: Outpost Zero is like a giant space submarine. If you run the big oxygen plant, heaters, and rovers at full blast, our battery will drain before midnight. Check the preview calculator before committing!`
+    : `Flight Director: Sol ${currentSol} subsystem synchronization nominal. Enforce NASA-STD-3001 metabolic constraints (0.96 kg O2/day and 2.5 L potable water per crewmember) and maintain ALARA radiation protocols across all EVA and surface operations.`;
 
   const displayText = speechText || defaultSpeech;
 
   return (
     <div className="relative flex items-start gap-4 p-4 rounded-xl bg-space-850/90 border border-cyan-500/20 backdrop-blur-md shadow-cyan-glow/20 transition-all hover:border-cyan-400/40">
       {/* Illustrated SVG Astronaut Avatar */}
-      <div className="relative flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20">
+      <div className="relative flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20" aria-hidden="true">
         <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-md">
           {/* Helmet Outer Shell */}
           <circle cx="50" cy="46" r="38" fill="#F1F5F9" stroke="#94A3B8" strokeWidth="2.5" />
@@ -103,7 +103,8 @@ export const CommanderAria: React.FC<CommanderAriaProps> = ({
         {onQuickTipClick && (
           <button
             onClick={onQuickTipClick}
-            className="mt-2 text-[11px] font-mono text-cyan-neon hover:text-cyan-300 hover:underline inline-flex items-center gap-1"
+            aria-label="Ask Aria for trade-off engineering hints"
+            className="mt-2 text-[11px] font-mono text-cyan-neon hover:text-cyan-300 hover:underline inline-flex items-center gap-1 focus:ring-1 focus:ring-cyan-400"
           >
             <span>💡 Ask Aria for trade-off hints</span>
           </button>

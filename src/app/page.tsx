@@ -23,6 +23,8 @@ import {
   simulateNextSol,
   SolSimulationResult,
   getSolEnvironmentModifiers,
+  applyResourceDeltas,
+  calculateMissionScore,
 } from '../lib/simulationEngine';
 import { storage, SavedMissionState } from '../lib/storage';
 import { audioEngine } from '../lib/audioEngine';
@@ -40,6 +42,7 @@ import { CrisisModal } from '../components/CrisisModal';
 import { TimeMachineModal } from '../components/TimeMachineModal';
 import { DebriefCertificateModal } from '../components/DebriefCertificateModal';
 import { ScienceLabModal } from '../components/ScienceLabModal';
+import { BriefingModal } from '../components/BriefingModal';
 
 export default function MissionControlPage() {
   // --- State Initialization ---
@@ -69,6 +72,7 @@ export default function MissionControlPage() {
     },
   ]);
   const [crew, setCrew] = useState<CrewMember[]>(DEFAULT_CREW);
+  const [resolvedCrises, setResolvedCrises] = useState<string[]>([]);
   const [selectedModule, setSelectedModule] = useState<string | null>(null);
 
   // Modals & Overlays
@@ -76,6 +80,7 @@ export default function MissionControlPage() {
   const [failureReason, setFailureReason] = useState<FailureReason | null>(null);
   const [showCertificate, setShowCertificate] = useState(false);
   const [showScienceLab, setShowScienceLab] = useState(false);
+  const [showBriefing, setShowBriefing] = useState(false);
 
   // DONKI Live API state
   const [donkiState, setDonkiState] = useState<DonkiApiResult | null>(null);
@@ -103,12 +108,13 @@ export default function MissionControlPage() {
       setAllocations(saved.allocations);
       setHistory(saved.history);
       setCrew(saved.crew);
+      setResolvedCrises(saved.resolvedCrises || []);
       if (saved.isCompleted) {
         setShowCertificate(true);
       }
     }
 
-    // Auto-fetch DONKI or fallback
+    // Auto-fetch DONKI space weather
     handleSyncDonki();
   }, []);
 
@@ -121,23 +127,29 @@ export default function MissionControlPage() {
         alloc: PowerAllocation;
         hist: SolLogEntry[];
         crw: CrewMember[];
+        resolved: string[];
         completed: boolean;
       }>
     ) => {
+      const currentHist = overrides?.hist ?? history;
+      const currentRes = overrides?.res ?? resources;
+      const derivedScore = calculateMissionScore(currentRes, currentHist);
+
       const stateToSave: SavedMissionState = {
         missionId,
         currentSol: overrides?.sol ?? currentSol,
-        resources: overrides?.res ?? resources,
+        resources: currentRes,
         allocations: overrides?.alloc ?? allocations,
-        history: overrides?.hist ?? history,
+        history: currentHist,
         crew: overrides?.crw ?? crew,
+        resolvedCrises: overrides?.resolved ?? resolvedCrises,
         isCompleted: overrides?.completed ?? showCertificate,
-        score: 85,
+        score: derivedScore,
         lastUpdated: new Date().toISOString(),
       };
       storage.saveMissionState(stateToSave);
     },
-    [missionId, currentSol, resources, allocations, history, crew, showCertificate]
+    [missionId, currentSol, resources, allocations, history, crew, resolvedCrises, showCertificate]
   );
 
   // --- Live NASA DONKI Fetch ---
@@ -186,6 +198,43 @@ export default function MissionControlPage() {
       },
     ]);
     setCrew(DEFAULT_CREW);
+    setResolvedCrises([]);
+    setActiveCrisis(null);
+    setFailureReason(null);
+    setShowCertificate(false);
+    storage.clearMissionState();
+  };
+
+  // --- Reset Current Scenario ---
+  const handleResetCurrentScenario = () => {
+    const currentConfig = MISSIONS[missionId];
+    setCurrentSol(1);
+    setResources(currentConfig.initialResources);
+    setAllocations({
+      lifeSupportKw: missionId === 'mars_jezero' ? 3.0 : 3.5,
+      hydroponicsKw: 2.5,
+      shieldThermalKw: 3.5,
+      scienceIsruKw: 2.0,
+    });
+    setHistory([
+      {
+        sol: 1,
+        powerGeneratedKw: currentConfig.maxPowerBudgetKw,
+        powerConsumedKw: 11.0,
+        batteryPct: Math.round(
+          (currentConfig.initialResources.batteryKWh /
+            currentConfig.initialResources.batteryCapacityKWh) *
+            100
+        ),
+        oxygenKg: currentConfig.initialResources.oxygenKg,
+        waterLiters: currentConfig.initialResources.waterLiters,
+        radiationDoseMSv: currentConfig.ambientRadiationMSvPerDay,
+        cabinTempC: currentConfig.initialResources.cabinTempC,
+        moralePct: currentConfig.initialResources.crewMoralePct,
+      },
+    ]);
+    setCrew(DEFAULT_CREW);
+    setResolvedCrises([]);
     setActiveCrisis(null);
     setFailureReason(null);
     setShowCertificate(false);
@@ -203,14 +252,31 @@ export default function MissionControlPage() {
 
   // --- Advance to Next Sol ---
   const handleAdvanceSol = () => {
-    // 1. Check if a dynamic space crisis triggers on this sol before advancing
-    const crisisForSol = mission.crises.find((c) => c.sol === currentSol);
+    // 1. Check if an unresolved space crisis is scheduled for the current Sol
+    const crisisForSol = mission.crises.find(
+      (c) => c.sol === currentSol && !resolvedCrises.includes(c.id)
+    );
+
     if (crisisForSol && !activeCrisis) {
+      // Snapshot state BEFORE crisis choice is taken
+      const snapshot: SavedMissionState = {
+        missionId,
+        currentSol,
+        resources,
+        allocations,
+        history,
+        crew,
+        resolvedCrises,
+        isCompleted: false,
+        score: calculateMissionScore(resources, history),
+        lastUpdated: new Date().toISOString(),
+      };
+      storage.pushRewindSnapshot(snapshot);
       setActiveCrisis(crisisForSol);
       return;
     }
 
-    // Save snapshot to Time Machine rewind stack
+    // Snapshot state BEFORE advancing the Sol
     const snapshot: SavedMissionState = {
       missionId,
       currentSol,
@@ -218,13 +284,14 @@ export default function MissionControlPage() {
       allocations,
       history,
       crew,
+      resolvedCrises,
       isCompleted: false,
-      score: 80,
+      score: calculateMissionScore(resources, history),
       lastUpdated: new Date().toISOString(),
     };
     storage.pushRewindSnapshot(snapshot);
 
-    // Run scientific simulation
+    // Run deterministic scientific simulation
     const result = simulateNextSol(mission, resources, allocations, crew, currentSol);
 
     if (result.failureReason) {
@@ -240,7 +307,7 @@ export default function MissionControlPage() {
     setHistory(newHistory);
 
     if (nextSolNumber > mission.missionDurationSols) {
-      // Mission survived!
+      // Mission completed
       setShowCertificate(true);
       saveCurrentMission({
         sol: currentSol,
@@ -258,8 +325,10 @@ export default function MissionControlPage() {
         crw: result.nextCrew,
       });
 
-      // Check if the NEW sol immediately has a crisis
-      const nextCrisis = mission.crises.find((c) => c.sol === nextSolNumber);
+      // Check if next sol immediately triggers a crisis
+      const nextCrisis = mission.crises.find(
+        (c) => c.sol === nextSolNumber && !resolvedCrises.includes(c.id)
+      );
       if (nextCrisis) {
         setActiveCrisis(nextCrisis);
       }
@@ -268,39 +337,20 @@ export default function MissionControlPage() {
 
   // --- Handle Crisis Decision Choice ---
   const handleCrisisChoice = (choice: CrisisChoice) => {
-    // Apply crisis deltas to current resources
-    const imp = choice.resourceImpacts;
-    const updatedResources: ResourceState = {
-      ...resources,
-      batteryKWh: Math.max(
-        0,
-        resources.batteryKWh + (imp.batteryKWhDelta || 0)
-      ),
-      oxygenKg: Math.max(0, resources.oxygenKg + (imp.oxygenKgDelta || 0)),
-      waterLiters: Math.max(0, resources.waterLiters + (imp.waterLitersDelta || 0)),
-      regolithShieldCm: Math.max(
-        20,
-        resources.regolithShieldCm + (imp.shieldCmDelta || 0)
-      ),
-      radiationDoseAccumulatedMSv: parseFloat(
-        (resources.radiationDoseAccumulatedMSv + (imp.radiationMSvDelta || 0)).toFixed(3)
-      ),
-      cabinTempC: parseFloat(
-        (resources.cabinTempC + (imp.tempDeltaC || 0)).toFixed(1)
-      ),
-      crewMoralePct: Math.min(
-        100,
-        Math.max(0, resources.crewMoralePct + (imp.moraleDelta || 0))
-      ),
-      foodRationsDays: Math.max(
-        0,
-        resources.foodRationsDays + (imp.foodDaysDelta || 0)
-      ),
-    };
+    if (!activeCrisis) return;
+
+    // Apply choice deltas using canonical update function
+    const updatedResources = applyResourceDeltas(resources, choice.resourceImpacts);
+    const updatedResolved = [...resolvedCrises, activeCrisis.id];
 
     setResources(updatedResources);
+    setResolvedCrises(updatedResolved);
     setActiveCrisis(null);
-    saveCurrentMission({ res: updatedResources });
+
+    saveCurrentMission({
+      res: updatedResources,
+      resolved: updatedResolved,
+    });
   };
 
   // --- Time Machine Rewind ---
@@ -312,15 +362,16 @@ export default function MissionControlPage() {
       setAllocations(prev.allocations);
       setHistory(prev.history);
       setCrew(prev.crew);
+      setResolvedCrises(prev.resolvedCrises || []);
       setFailureReason(null);
+      setActiveCrisis(null);
       storage.saveMissionState(prev);
     } else {
-      // Fallback to sol 1
-      handleSelectMission(missionId);
+      handleResetCurrentScenario();
     }
   };
 
-  // --- Reset to Baseline NASA Parameters ---
+  // --- Reset to Baseline Parameters ---
   const handleResetToBaseline = () => {
     setAllocations({
       lifeSupportKw: missionId === 'mars_jezero' ? 3.0 : 3.5,
@@ -341,8 +392,8 @@ export default function MissionControlPage() {
   const envModifiers = getSolEnvironmentModifiers(mission, currentSol);
 
   return (
-    <div className="min-h-screen flex flex-col bg-space-950 text-slate-100">
-      {/* Top Navigation */}
+    <div className="min-h-screen flex flex-col bg-space-950 text-slate-100 max-w-full overflow-x-hidden">
+      {/* Top Navigation Bar */}
       <Navbar
         currentMissionId={missionId}
         mode={mode}
@@ -354,12 +405,24 @@ export default function MissionControlPage() {
         onToggleMode={handleToggleMode}
         onSyncDonki={handleSyncDonki}
         onOpenScienceLab={() => setShowScienceLab(true)}
+        onOpenBriefing={() => setShowBriefing(true)}
       />
 
       {/* Main Content Area */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 py-6 space-y-6">
+        {/* Persistent Educational Notice Banner */}
+        <div className="p-3 rounded-xl bg-amber-950/25 border border-amber-500/30 text-amber-200/90 text-xs font-sans flex items-start gap-2 shadow-sm">
+          <span className="text-amber-400 text-sm" aria-hidden="true">⚠️</span>
+          <div>
+            <strong>Persistent Notice:</strong> OUTPOST ZERO is an educational simulation, not an engineering design tool, flight procedure, radiation safety assessment, or NASA/ISRO-endorsed product.
+          </div>
+        </div>
+
         {/* Mission Briefing Banner */}
-        <section className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-space-900 via-space-850 to-space-900 border border-slate-800 p-4 sm:p-6 shadow-xl">
+        <section
+          aria-label="Mission Briefing and Environmental Conditions"
+          className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-space-900 via-space-850 to-space-900 border border-slate-800 p-4 sm:p-6 shadow-xl"
+        >
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
             <div className="space-y-1">
               <div className="flex flex-wrap items-center gap-2">
@@ -402,7 +465,7 @@ export default function MissionControlPage() {
         </section>
 
         {/* Commander Aria Mentor Card */}
-        <section>
+        <section aria-label="Commander Aria Mentor Guidance">
           <CommanderAria
             mode={mode}
             currentSol={currentSol}
@@ -419,8 +482,8 @@ export default function MissionControlPage() {
           />
         </section>
 
-        {/* Interactive SVG Outpost Map (Center Stage) */}
-        <section>
+        {/* Interactive SVG Outpost Map */}
+        <section aria-label="Interactive Habitat Schematic and Site Imagery">
           <OutpostMapSvg
             mission={mission}
             resources={resources}
@@ -433,7 +496,7 @@ export default function MissionControlPage() {
         </section>
 
         {/* Pre-Flight Calculator & Deltas Preview */}
-        <section>
+        <section aria-label="Pre-Flight Consequence Preview Calculator">
           <PreFlightCalculator
             deltas={preFlightDeltas}
             currentResources={resources}
@@ -446,7 +509,7 @@ export default function MissionControlPage() {
         </section>
 
         {/* 4 Engineering Allocation Sliders */}
-        <section>
+        <section aria-label="Electrical Power Allocation Controls">
           <AllocationSliders
             mission={mission}
             allocations={allocations}
@@ -458,12 +521,12 @@ export default function MissionControlPage() {
         </section>
 
         {/* Crew & Player Profile Badges */}
-        <section>
+        <section aria-label="Crew Status and Morale">
           <AstroProfileCard crew={crew} mode={mode} />
         </section>
 
         {/* Multi-Channel Telemetry Historical Charts */}
-        <section>
+        <section aria-label="Subsystem Telemetry History Charts">
           <TelemetryCharts history={history} mode={mode} />
         </section>
       </main>
@@ -471,10 +534,12 @@ export default function MissionControlPage() {
       {/* Footer */}
       <Footer
         onOpenScienceLab={() => setShowScienceLab(true)}
-        onResetProgress={() => handleSelectMission(missionId)}
+        onOpenBriefing={() => setShowBriefing(true)}
+        onResetProgress={handleResetCurrentScenario}
       />
 
-      {/* --- MODALS --- */}
+      {/* --- MODALS & OVERLAYS --- */}
+
       {/* 1. Dynamic Space Crisis Modal */}
       {activeCrisis && (
         <CrisisModal
@@ -492,11 +557,11 @@ export default function MissionControlPage() {
           mode={mode}
           canRewind={storage.getRewindStack().length > 0}
           onRewindOneSol={handleRewindOneSol}
-          onRestartMission={() => handleSelectMission(missionId)}
+          onRestartMission={handleResetCurrentScenario}
         />
       )}
 
-      {/* 3. Junior Astronaut Mission Debrief & Certificate */}
+      {/* 3. Educational Mission Completion Certificate */}
       {showCertificate && (
         <DebriefCertificateModal
           mission={mission}
@@ -504,13 +569,22 @@ export default function MissionControlPage() {
           history={history}
           mode={mode}
           onClose={() => setShowCertificate(false)}
-          onRestart={() => handleSelectMission(missionId)}
+          onRestart={handleResetCurrentScenario}
         />
       )}
 
-      {/* 4. NASA & ISRO Science Lab & Teacher Guide */}
+      {/* 4. NASA & ISRO Science Lab & Provenance Registry */}
       {showScienceLab && (
         <ScienceLabModal onClose={() => setShowScienceLab(false)} />
+      )}
+
+      {/* 5. Mission Briefing Overview Modal */}
+      {showBriefing && (
+        <BriefingModal
+          mission={mission}
+          mode={mode}
+          onClose={() => setShowBriefing(false)}
+        />
       )}
     </div>
   );

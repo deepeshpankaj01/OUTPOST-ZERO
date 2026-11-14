@@ -2,6 +2,11 @@ export type MissionId = 'moon_shackleton' | 'mars_jezero';
 
 export type AudienceMode = 'cadet' | 'flight_director';
 
+export type ProvenanceType =
+  | 'OBSERVED_SOURCE_DATA'
+  | 'DERIVED_CALCULATION'
+  | 'SIMULATION_ASSUMPTION';
+
 export interface CrewMember {
   id: string;
   name: string;
@@ -19,19 +24,19 @@ export interface ResourceState {
   oxygenKg: number;           // Current O2 (kg)
   waterLiters: number;        // Current potable water (L)
   regolithShieldCm: number;   // Shield thickness (cm)
-  shieldIntegrityPct: number; // 0-100%
-  cabinTempC: number;         // Target 21-22°C
-  radiationDoseAccumulatedMSv: number; // Total accumulated mSv
-  radiationRateMSvPerDay: number;      // Current rate mSv/day
+  shieldIntegrityPct: number; // 0-100% (illustrative simulation metric)
+  cabinTempC: number;         // Target 18.3-26.7°C (NASA-STD-3001 nominal: 22°C)
+  radiationDoseAccumulatedMSv: number; // Illustrative cumulative exposure index (mSv)
+  radiationRateMSvPerDay: number;      // Scenario estimated daily exposure (mSv/day)
   foodRationsDays: number;    // Hydroponic/preserved food days
   crewMoralePct: number;      // 0-100%
 }
 
 export interface PowerAllocation {
-  lifeSupportKw: number; // ECLSS / MOXIE
-  hydroponicsKw: number; // Food dome & supplemental O2
-  shieldThermalKw: number; // Regolith sintering & thermal heating
-  scienceIsruKw: number;  // Mining rovers & science drills
+  lifeSupportKw: number; // Scaled O2 generation & water recovery plant (kW)
+  hydroponicsKw: number; // Food dome & supplemental O2 lighting (kW)
+  shieldThermalKw: number; // Habitat thermal heaters & sintering rover power (kW)
+  scienceIsruKw: number;  // Geological survey & cryo-drill rovers (kW)
 }
 
 export interface SolLogEntry {
@@ -41,7 +46,7 @@ export interface SolLogEntry {
   batteryPct: number;
   oxygenKg: number;
   waterLiters: number;
-  radiationDoseMSv: number;
+  radiationDoseMSv: number; // Scenario estimate
   cabinTempC: number;
   moralePct: number;
   eventTitle?: string;
@@ -72,6 +77,7 @@ export interface CrisisChoice {
     tempDeltaC?: number;
   };
   tradeOffSummary: string;
+  provenanceType?: ProvenanceType;
 }
 
 export interface CrisisEvent {
@@ -85,6 +91,8 @@ export interface CrisisEvent {
   flightDirectorBriefing: string;
   warningLevel: 'caution' | 'warning' | 'critical';
   choices: CrisisChoice[];
+  provenanceType?: ProvenanceType;
+  scientificContext?: string;
 }
 
 export interface MissionConfig {
@@ -104,6 +112,11 @@ export interface MissionConfig {
   initialResources: ResourceState;
   maxPowerBudgetKw: number;
   crises: CrisisEvent[];
+  provenanceNotes?: {
+    observed: string[];
+    derived: string[];
+    assumptions: string[];
+  };
 }
 
 export interface PreFlightDelta {
@@ -122,10 +135,12 @@ export interface PreFlightDelta {
 
 export interface SpaceWeatherEvent {
   flareId: string;
-  classType: string; // e.g., "X2.4", "M5.1"
+  classType: string; // e.g., "X2.4", "M5.1" (GOES 0.1-0.8 nm soft X-ray peak flux)
   beginTime: string;
   peakTime: string;
   sourceLocation: string;
-  radiationFactor: number; // Multiplier on ambient radiation
+  radiationFactor: number; // Simulation scenario modifier (NOT a measured particle fluence)
   description: string;
+  observedDate?: string;
+  isExtrapolatedScenarioModifier?: boolean;
 }
