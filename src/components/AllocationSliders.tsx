@@ -47,314 +47,210 @@ export const AllocationSliders: React.FC<AllocationSlidersProps> = ({
     onChange(updated);
   };
 
+  // Subsystem configs with educational guidance
+  const subsystems = [
+    {
+      id: 'lifesupport',
+      field: 'lifeSupportKw' as keyof PowerAllocation,
+      icon: '🌬️',
+      name: isCadet ? 'Air & Water Maker' : isMars ? 'Scaled O₂ Plant & WRS Recycling' : 'ECLSS (O₂ & Water Recycling)',
+      subtitle: isCadet
+        ? 'Keeps 4 astronauts breathing & hydrated'
+        : isMars
+        ? 'Hypothetical 16× SOXE plant + closed-loop distillation'
+        : 'Water Recovery System & Oxygen Generation Assembly',
+      currentKw: allocations.lifeSupportKw,
+      minKw: 0.5,
+      maxKw: 6.0,
+      step: 0.5,
+      nominalKw: isMars ? 3.0 : 3.5,
+      warningThreshold: isMars ? 2.8 : 3.0,
+      warningText: isCadet ? 'Low Air Production! Oxygen will deplete.' : 'Sub-nominal O₂ generation (<3.84 kg/Sol demand).',
+      accentColor: 'text-sky-400',
+      trackColor: 'bg-sky-500',
+    },
+    {
+      id: 'hydroponics',
+      field: 'hydroponicsKw' as keyof PowerAllocation,
+      icon: '🌱',
+      name: isCadet ? 'Food Greenhouse' : 'Astro-Hydroponics & Food',
+      subtitle: isCadet
+        ? 'Grows fresh vegetables to boost morale'
+        : 'Artificial LED grow arrays supplementing calorie rations',
+      currentKw: allocations.hydroponicsKw,
+      minKw: 0.0,
+      maxKw: 5.0,
+      step: 0.5,
+      nominalKw: 2.5,
+      warningThreshold: 1.0,
+      warningText: isCadet ? 'Crops wilting from dim lights.' : 'Hydroponic crop stress (diminished calorie harvest).',
+      accentColor: 'text-emerald-400',
+      trackColor: 'bg-emerald-500',
+    },
+    {
+      id: 'shielding',
+      field: 'shieldThermalKw' as keyof PowerAllocation,
+      icon: '🛡️',
+      name: isCadet ? 'Cabin Heaters & Shield Berm' : 'Thermal Loops & Hull Shielding',
+      subtitle: isCadet
+        ? 'Keeps the base warm & piles dirt over the roof'
+        : 'Active thermal heating loop & regolith sintering rovers',
+      currentKw: allocations.shieldThermalKw,
+      minKw: 0.5,
+      maxKw: 6.0,
+      step: 0.5,
+      nominalKw: 3.5,
+      warningThreshold: 2.5,
+      warningText: isCadet ? 'Cabin is freezing! Turn up heaters.' : 'TCS heat loss risk (conductive hull dissipation).',
+      accentColor: 'text-amber-400',
+      trackColor: 'bg-amber-500',
+    },
+    {
+      id: 'science',
+      field: 'scienceIsruKw' as keyof PowerAllocation,
+      icon: '🚜',
+      name: isCadet ? 'Ice Harvester Rovers' : 'ISRU Ice Mining & Surface Science',
+      subtitle: isCadet
+        ? 'Digs up underground water-ice in dark craters'
+        : 'Cryogenic drilling for subsurface ice volatiles',
+      currentKw: allocations.scienceIsruKw,
+      minKw: 0.0,
+      maxKw: 5.0,
+      step: 0.5,
+      nominalKw: 2.0,
+      warningThreshold: 0.5,
+      warningText: isCadet ? 'Rovers idle in garage.' : 'No surface prospecting or ice harvesting active.',
+      accentColor: 'text-purple-400',
+      trackColor: 'bg-purple-500',
+    },
+  ];
+
   return (
-    <div className="rounded-2xl bg-space-900/90 border border-slate-800 p-4 sm:p-6 shadow-xl backdrop-blur-md">
-      {/* Header with Power Budget & Deficit Meter */}
-      <div className="flex flex-wrap items-center justify-between gap-3 mb-5 pb-3 border-b border-slate-800">
+    <div className="clean-card p-4 sm:p-5 shadow-card">
+      {/* Power Budget Header Bar */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 mb-4 border-b border-slate-800">
         <div>
-          <h3 className="text-base font-bold text-white flex items-center gap-2">
-            <span aria-hidden="true">⚙️</span>
-            <span>
-              {isCadet
-                ? 'Power Budget Allocation (The 4 Big Decisions!)'
-                : 'EPS (Electrical Power Subsystem) Bus Allocation Matrix'}
-            </span>
-          </h3>
+          <div className="flex items-center gap-2">
+            <span className="text-base" aria-hidden="true">⚡</span>
+            <h3 className="text-sm sm:text-base font-bold text-white tracking-wide">
+              {isCadet ? 'Power Allocation Controls' : 'Subsystem Power Allocations (kW)'}
+            </h3>
+          </div>
           <p className="text-xs text-slate-400 mt-0.5">
             {isCadet
-              ? 'Allocate continuous power (kW) across base modules. Unused power charges the battery bank!'
-              : `Continuous power allocations (kW). 1 Sol = ${solHours} hours. Daily Energy (kWh) = Allocated kW × ${solHours} h.`}
+              ? 'Distribute available electricity. Leftover power charges your battery!'
+              : `1 Sol = ${solHours} hours. Unallocated power (${netPowerDeltaKw > 0 ? `+${netPowerDeltaKw} kW` : `${netPowerDeltaKw} kW`}) feeds battery storage.`}
           </p>
         </div>
 
-        {/* Budget Status Badge */}
-        <div className="flex items-center gap-2 flex-wrap">
-          <div className="px-3 py-1.5 rounded-lg bg-space-950 border border-slate-700 text-right">
-            <div className="text-[10px] uppercase font-mono text-slate-400">Continuous Gen</div>
-            <div className="text-sm font-bold font-mono text-cyan-neon">
+        {/* Budget Status Metric Pills */}
+        <div className="flex items-center gap-2">
+          <div className="px-3 py-1.5 rounded-lg bg-space-950 border border-slate-800">
+            <span className="text-[10px] uppercase font-mono text-slate-400 block">Total Solar + Base</span>
+            <span className="text-xs sm:text-sm font-bold font-mono text-sky-400">
               {availablePowerKw.toFixed(1)} kW
-            </div>
+            </span>
           </div>
 
-          <div className="px-3 py-1.5 rounded-lg bg-space-950 border border-slate-700 text-right">
-            <div className="text-[10px] uppercase font-mono text-slate-400">Total Allocated</div>
-            <div
-              className={`text-sm font-bold font-mono ${
-                isDeficit ? 'text-coral-neon' : 'text-emerald-neon'
-              }`}
-            >
+          <div className="px-3 py-1.5 rounded-lg bg-space-950 border border-slate-800">
+            <span className="text-[10px] uppercase font-mono text-slate-400 block">Allocated</span>
+            <span className="text-xs sm:text-sm font-bold font-mono text-white">
               {totalAllocatedKw.toFixed(1)} kW
-            </div>
+            </span>
           </div>
 
           <div
-            className={`px-3 py-1.5 rounded-lg border text-right ${
+            className={`px-3 py-1.5 rounded-lg border font-mono ${
               isDeficit
-                ? 'bg-red-950/40 border-red-500/50 text-coral-neon'
-                : 'bg-emerald-950/40 border-emerald-500/50 text-emerald-neon'
+                ? 'bg-rose-500/10 border-rose-500/30 text-rose-400'
+                : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
             }`}
           >
-            <div className="text-[10px] uppercase font-mono">
-              {isDeficit ? '⚠️ Daily Battery Draw' : '✅ Stored in Battery'}
-            </div>
-            <div className="text-sm font-bold font-mono">
-              {isDeficit ? `${netDailyEnergyKWh} kWh/Sol` : `+${netDailyEnergyKWh} kWh/Sol`}
-            </div>
+            <span className="text-[10px] uppercase block">
+              {isDeficit ? '⚠️ Battery Drain' : '✅ Net Battery Gain'}
+            </span>
+            <span className="text-xs sm:text-sm font-bold">
+              {netPowerDeltaKw > 0 ? '+' : ''}
+              {netPowerDeltaKw.toFixed(1)} kW{' '}
+              <span className="text-[11px] font-normal">
+                ({netDailyEnergyKWh > 0 ? '+' : ''}
+                {netDailyEnergyKWh} kWh/Sol)
+              </span>
+            </span>
           </div>
         </div>
       </div>
 
-      {/* Sliders Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        {/* SLIDER 1: LIFE SUPPORT & SCALED O2 / ECLSS */}
-        <div
-          className={`p-4 rounded-xl transition-all border ${
-            focusedSlider === 'lifesupport'
-              ? 'bg-cyan-950/40 border-cyan-400 shadow-cyan-glow/20'
-              : 'bg-space-850/80 border-slate-800 hover:border-slate-700'
-          }`}
-        >
-          <div className="flex items-center justify-between mb-1.5">
-            <div className="flex items-center gap-2">
-              <span className="text-lg" aria-hidden="true">🌬️</span>
-              <div>
-                <h4 className="font-bold text-sm text-cyan-300">
-                  {isCadet
-                    ? isMars
-                      ? 'Scaled Oxygen Plant & Water Recycler'
-                      : 'Oxygen Maker & Water Recycler'
-                    : isMars
-                    ? 'Hypothetical Scaled Oxygen Plant (16x MOXIE Scale)'
-                    : 'ECLSS OGA Electrolysis & WRS Assembly'}
-                </h4>
-                <div className="text-[10px] text-slate-400 font-mono">
-                  {isMars
-                    ? '[DERIVED] 16x MOXIE Scale-Up (~3.0 kW nominal for 4 crew)'
-                    : '[OBSERVED & DERIVED] NASA-STD-3001 4-Crew Baseline'}
+      {/* 4 Interactive Sliders Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+        {subsystems.map((sub) => {
+          const isBelowThreshold = sub.currentKw < sub.warningThreshold;
+          const isFocused = focusedSlider === sub.id;
+
+          return (
+            <div
+              key={sub.id}
+              className={`clean-card-subtle p-3.5 transition-all ${
+                isFocused
+                  ? 'border-sky-400 bg-sky-950/20'
+                  : 'hover:border-slate-700 hover:bg-space-850/60'
+              }`}
+            >
+              <div className="flex items-start justify-between gap-2 mb-1.5">
+                <div className="flex items-center gap-2">
+                  <span className="text-lg p-1 rounded-md bg-space-950 border border-slate-800/80" aria-hidden="true">
+                    {sub.icon}
+                  </span>
+                  <div>
+                    <h4 className="text-xs sm:text-sm font-bold text-white flex items-center gap-1.5">
+                      <span>{sub.name}</span>
+                    </h4>
+                    <p className="text-[11px] text-slate-400 line-clamp-1">{sub.subtitle}</p>
+                  </div>
+                </div>
+
+                <div className="text-right flex-shrink-0">
+                  <span className={`text-base font-bold font-mono ${sub.accentColor}`}>
+                    {sub.currentKw.toFixed(1)} <span className="text-xs font-normal text-slate-400">kW</span>
+                  </span>
+                  <span className="text-[10px] font-mono text-slate-400 block">
+                    {(sub.currentKw * solHours).toFixed(1)} kWh/Sol
+                  </span>
                 </div>
               </div>
-            </div>
 
-            <div className="text-right">
-              <span className="text-sm font-mono font-bold text-cyan-neon">
-                {allocations.lifeSupportKw.toFixed(1)} kW
-              </span>
-              <div className="text-[10px] text-slate-400">
-                {(allocations.lifeSupportKw * solHours).toFixed(0)} kWh/Sol
+              {/* Slider Input Track */}
+              <div className="mt-3 mb-1">
+                <input
+                  type="range"
+                  aria-label={`${sub.name} power allocation slider`}
+                  min={sub.minKw}
+                  max={sub.maxKw}
+                  step={sub.step}
+                  value={sub.currentKw}
+                  onChange={(e) => handleSliderChange(sub.field, parseFloat(e.target.value))}
+                  className="w-full accent-sky-400"
+                />
               </div>
-            </div>
-          </div>
 
-          <p className="text-xs text-slate-300 mb-3">
-            {isCadet
-              ? 'Generates fresh oxygen for the crew and purifies wastewater back into drinking water.'
-              : isMars
-              ? 'Powers high-temperature Solid Oxide Electrolysis (SOXE) cell stack and closed-loop distillation.'
-              : 'Powers water electrolysis and catalytic closed-loop water recovery.'}
-          </p>
+              {/* Min, Nominal Benchmark & Warning Indicator */}
+              <div className="flex items-center justify-between text-[10px] font-mono text-slate-400 mt-1">
+                <span>{sub.minKw} kW</span>
+                <span className="text-slate-400">
+                  Target: <strong className="text-slate-300">{sub.nominalKw} kW</strong>
+                </span>
+                <span>{sub.maxKw} kW</span>
+              </div>
 
-          <input
-            type="range"
-            min="0.5"
-            max="6.0"
-            step="0.1"
-            aria-label="Power allocation for Life Support and Oxygen Generation in kilowatts"
-            aria-valuemin={0.5}
-            aria-valuemax={6.0}
-            aria-valuenow={allocations.lifeSupportKw}
-            aria-valuetext={`${allocations.lifeSupportKw} kilowatts`}
-            value={allocations.lifeSupportKw}
-            onChange={(e) => handleSliderChange('lifeSupportKw', parseFloat(e.target.value))}
-            className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-cyan-neon focus:ring-2 focus:ring-cyan-400"
-          />
-
-          <div className="flex justify-between text-[10px] font-mono text-slate-400 mt-1">
-            <span>0.5 kW (Emergency)</span>
-            <span className="text-cyan-400 font-bold">3.0–3.5 kW (Baseline Target)</span>
-            <span>6.0 kW (High Yield)</span>
-          </div>
-        </div>
-
-        {/* SLIDER 2: HYDROPONIC ASTRO-GARDEN */}
-        <div
-          className={`p-4 rounded-xl transition-all border ${
-            focusedSlider === 'hydroponics'
-              ? 'bg-emerald-950/40 border-emerald-400 shadow-emerald-glow/20'
-              : 'bg-space-850/80 border-slate-800 hover:border-slate-700'
-          }`}
-        >
-          <div className="flex items-center justify-between mb-1.5">
-            <div className="flex items-center gap-2">
-              <span className="text-lg" aria-hidden="true">🌱</span>
-              <div>
-                <h4 className="font-bold text-sm text-emerald-300">
-                  {isCadet ? 'Hydroponic Astro-Garden' : 'Hydroponic Biomass & O2 Loop'}
-                </h4>
-                <div className="text-[10px] text-slate-400 font-mono">
-                  [SIMULATION ASSUMPTION] Plant Habitat Modeling
+              {isBelowThreshold && (
+                <div className="mt-2 text-[11px] text-amber-400/90 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20 flex items-center gap-1">
+                  <span aria-hidden="true">⚠️</span>
+                  <span>{sub.warningText}</span>
                 </div>
-              </div>
+              )}
             </div>
-
-            <div className="text-right">
-              <span className="text-sm font-mono font-bold text-emerald-neon">
-                {allocations.hydroponicsKw.toFixed(1)} kW
-              </span>
-              <div className="text-[10px] text-slate-400">
-                {(allocations.hydroponicsKw * solHours).toFixed(0)} kWh/Sol
-              </div>
-            </div>
-          </div>
-
-          <p className="text-xs text-slate-300 mb-3">
-            {isCadet
-              ? 'Grows fresh astronaut vegetables and strawberries, boosting morale and oxygen!'
-              : 'Powers red/blue LED arrays and nutrient dosing loops to produce biomass and supplemental O2.'}
-          </p>
-
-          <input
-            type="range"
-            min="0.0"
-            max="5.0"
-            step="0.1"
-            aria-label="Power allocation for Hydroponic Astro-Garden in kilowatts"
-            aria-valuemin={0.0}
-            aria-valuemax={5.0}
-            aria-valuenow={allocations.hydroponicsKw}
-            aria-valuetext={`${allocations.hydroponicsKw} kilowatts`}
-            value={allocations.hydroponicsKw}
-            onChange={(e) => handleSliderChange('hydroponicsKw', parseFloat(e.target.value))}
-            className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-emerald-500 focus:ring-2 focus:ring-emerald-400"
-          />
-
-          <div className="flex justify-between text-[10px] font-mono text-slate-400 mt-1">
-            <span>0 kW (Dark)</span>
-            <span className="text-emerald-400 font-bold">2.5 kW (Nominal Growth)</span>
-            <span>5.0 kW (Max Harvest)</span>
-          </div>
-        </div>
-
-        {/* SLIDER 3: ACTIVE THERMAL & REGOLITH SHIELDING */}
-        <div
-          className={`p-4 rounded-xl transition-all border ${
-            focusedSlider === 'shield'
-              ? 'bg-amber-950/40 border-amber-400 shadow-amber-glow/20'
-              : 'bg-space-850/80 border-slate-800 hover:border-slate-700'
-          }`}
-        >
-          <div className="flex items-center justify-between mb-1.5">
-            <div className="flex items-center gap-2">
-              <span className="text-lg" aria-hidden="true">🛡️</span>
-              <div>
-                <h4 className="font-bold text-sm text-amber-300">
-                  {isCadet
-                    ? 'Habitat Heaters & Radiation Shielding'
-                    : 'TCS Heaters & Regolith Sintering Rovers'}
-                </h4>
-                <div className="text-[10px] text-slate-400 font-mono">
-                  [SIMULATION ASSUMPTION] Thermal &amp; Radiation Control
-                </div>
-              </div>
-            </div>
-
-            <div className="text-right">
-              <span className="text-sm font-mono font-bold text-amber-neon">
-                {allocations.shieldThermalKw.toFixed(1)} kW
-              </span>
-              <div className="text-[10px] text-slate-400">
-                {(allocations.shieldThermalKw * solHours).toFixed(0)} kWh/Sol
-              </div>
-            </div>
-          </div>
-
-          <p className="text-xs text-slate-300 mb-3">
-            {isCadet
-              ? 'Powers heaters to keep the base at 22°C and runs rovers that pile moon soil to shield radiation.'
-              : 'Maintains NASA-STD-3001 cabin thermal setpoint (22°C) against outer cold and powers sintering rovers.'}
-          </p>
-
-          <input
-            type="range"
-            min="0.5"
-            max="6.0"
-            step="0.1"
-            aria-label="Power allocation for Thermal Control and Shielding in kilowatts"
-            aria-valuemin={0.5}
-            aria-valuemax={6.0}
-            aria-valuenow={allocations.shieldThermalKw}
-            aria-valuetext={`${allocations.shieldThermalKw} kilowatts`}
-            value={allocations.shieldThermalKw}
-            onChange={(e) => handleSliderChange('shieldThermalKw', parseFloat(e.target.value))}
-            className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-amber-500 focus:ring-2 focus:ring-amber-400"
-          />
-
-          <div className="flex justify-between text-[10px] font-mono text-slate-400 mt-1">
-            <span>0.5 kW (Cold Risk)</span>
-            <span className="text-amber-400 font-bold">3.5 kW (22°C Target)</span>
-            <span>6.0 kW (Storm Defense)</span>
-          </div>
-        </div>
-
-        {/* SLIDER 4: SCIENCE & ISRU MINING ROVERS */}
-        <div
-          className={`p-4 rounded-xl transition-all border ${
-            focusedSlider === 'science'
-              ? 'bg-purple-950/40 border-purple-400 shadow-purple-500/20'
-              : 'bg-space-850/80 border-slate-800 hover:border-slate-700'
-          }`}
-        >
-          <div className="flex items-center justify-between mb-1.5">
-            <div className="flex items-center gap-2">
-              <span className="text-lg" aria-hidden="true">🔬</span>
-              <div>
-                <h4 className="font-bold text-sm text-purple-300">
-                  {isCadet
-                    ? 'Robot Rover Ice Drills & Science Lab'
-                    : 'ISRU Volatiles Extraction & Autonomous Rovers'}
-                </h4>
-                <div className="text-[10px] text-slate-400 font-mono">
-                  [SIMULATION ASSUMPTION] Educational In-Situ Resource Loop
-                </div>
-              </div>
-            </div>
-
-            <div className="text-right">
-              <span className="text-sm font-mono font-bold text-purple-400">
-                {allocations.scienceIsruKw.toFixed(1)} kW
-              </span>
-              <div className="text-[10px] text-slate-400">
-                {(allocations.scienceIsruKw * solHours).toFixed(0)} kWh/Sol
-              </div>
-            </div>
-          </div>
-
-          <p className="text-xs text-slate-300 mb-3">
-            {isCadet
-              ? 'Dispatches rovers into dark craters to drill for buried ice and study geological history!'
-              : 'Drives autonomous drills and microwave sublimation ovens to prospect for volatiles.'}
-          </p>
-
-          <input
-            type="range"
-            min="0.0"
-            max="5.0"
-            step="0.1"
-            aria-label="Power allocation for Science and ISRU Drills in kilowatts"
-            aria-valuemin={0.0}
-            aria-valuemax={5.0}
-            aria-valuenow={allocations.scienceIsruKw}
-            aria-valuetext={`${allocations.scienceIsruKw} kilowatts`}
-            value={allocations.scienceIsruKw}
-            onChange={(e) => handleSliderChange('scienceIsruKw', parseFloat(e.target.value))}
-            className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-purple-500 focus:ring-2 focus:ring-purple-400"
-          />
-
-          <div className="flex justify-between text-[10px] font-mono text-slate-400 mt-1">
-            <span>0 kW (Standby)</span>
-            <span className="text-purple-400 font-bold">2.0 kW (Survey)</span>
-            <span>5.0 kW (Active Extraction)</span>
-          </div>
-        </div>
+          );
+        })}
       </div>
     </div>
   );

@@ -24,11 +24,11 @@ export const CrisisModal: React.FC<CrisisModalProps> = ({ crisis, mode, onSelect
       aria-labelledby="crisis-dialog-title"
       className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-space-950/85 backdrop-blur-md overflow-y-auto animate-in fade-in duration-200"
     >
-      <div className="relative w-full max-w-3xl rounded-2xl bg-space-900 border-2 border-amber-500/80 shadow-amber-glow p-5 sm:p-8 overflow-hidden my-auto">
-        {/* Pulsing warning light header */}
-        <div className="flex items-center justify-between gap-3 mb-4 pb-3 border-b border-amber-500/30">
+      <div className="relative w-full max-w-3xl rounded-2xl bg-space-900 border border-amber-500/40 shadow-2xl p-5 sm:p-7 overflow-hidden my-auto">
+        {/* Warning header */}
+        <div className="flex items-center justify-between gap-3 mb-4 pb-3 border-b border-amber-500/20">
           <div className="flex items-center gap-3">
-            <span className="w-3.5 h-3.5 rounded-full bg-coral-neon animate-ping" aria-hidden="true" />
+            <span className="w-3 h-3 rounded-full bg-amber-400" aria-hidden="true" />
             <div>
               <span className="text-[11px] font-mono uppercase tracking-wider text-amber-400 font-bold">
                 ⚠️ PRIORITY FLIGHT CONTROLLER ALERT • SOL {crisis.sol}
@@ -40,10 +40,10 @@ export const CrisisModal: React.FC<CrisisModalProps> = ({ crisis, mode, onSelect
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="px-2 py-0.5 rounded text-[10px] font-mono uppercase bg-amber-950/80 text-amber-300 border border-amber-600/50">
+            <span className="px-2 py-0.5 rounded text-[10px] font-mono uppercase bg-amber-500/10 text-amber-300 border border-amber-500/30">
               {crisis.warningLevel.toUpperCase()}
             </span>
-            <span className="px-2 py-0.5 rounded text-[10px] font-mono uppercase bg-blue-950/80 text-cyan-300 border border-blue-600/50">
+            <span className="px-2 py-0.5 rounded text-[10px] font-mono uppercase bg-sky-500/10 text-sky-300 border border-sky-500/30">
               SIMULATION ASSUMPTION
             </span>
           </div>

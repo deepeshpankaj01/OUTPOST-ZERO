@@ -4,71 +4,87 @@
 
 :root {
   --foreground-rgb: 241, 245, 249;
-  --background-start-rgb: 7, 11, 25;
-  --background-end-rgb: 4, 7, 17;
+  --background-start-rgb: 6, 10, 23;
+  --background-end-rgb: 11, 18, 38;
 }
 
 body {
   color: rgb(var(--foreground-rgb));
-  background: radial-gradient(circle at 50% 20%, #0c142c 0%, #070b19 50%, #030611 100%);
+  background: radial-gradient(circle at 50% 0%, #101B36 0%, #0B1226 50%, #060A17 100%);
   background-attachment: fixed;
   min-height: 100vh;
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
 }
 
-/* Custom scrollbars */
+/* Custom modern sleek scrollbars */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #070b19;
+  background: #060A17;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #1e293b;
+  background: #1C2C54;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #00f0ff;
+  background: #38BDF8;
 }
 
-/* Range input slider track styling */
+/* Tactile, clean range slider styling */
 input[type='range'] {
   -webkit-appearance: none;
-  background: #1e293b;
-  border-radius: 8px;
+  appearance: none;
+  background: #101B36;
+  border-radius: 9999px;
+  height: 8px;
+  outline: none;
+  cursor: pointer;
 }
 
 input[type='range']::-webkit-slider-thumb {
   -webkit-appearance: none;
+  appearance: none;
   height: 20px;
   width: 20px;
   border-radius: 50%;
-  background: #00f0ff;
+  background: #38BDF8;
+  border: 2px solid #FFFFFF;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
   cursor: pointer;
-  box-shadow: 0 0 10px rgba(0, 240, 255, 0.6);
-  transition: transform 0.1s ease;
+  transition: transform 0.15s ease, background-color 0.15s ease;
 }
 
 input[type='range']::-webkit-slider-thumb:hover {
   transform: scale(1.15);
+  background: #7DD3FC;
 }
 
 input[type='range']::-moz-range-thumb {
   height: 20px;
   width: 20px;
   border-radius: 50%;
-  background: #00f0ff;
+  background: #38BDF8;
+  border: 2px solid #FFFFFF;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
   cursor: pointer;
-  box-shadow: 0 0 10px rgba(0, 240, 255, 0.6);
 }
 
-/* Glassmorphism helpers */
-.glass-panel {
-  background: rgba(11, 17, 38, 0.85);
+/* Clean UI Cards */
+.clean-card {
+  background: rgba(14, 23, 48, 0.85);
+  border: 1px solid rgba(28, 44, 84, 0.8);
+  border-radius: 1rem;
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(56, 189, 248, 0.15);
+}
+
+.clean-card-subtle {
+  background: rgba(10, 16, 35, 0.75);
+  border: 1px solid rgba(24, 38, 72, 0.7);
+  border-radius: 0.75rem;
 }

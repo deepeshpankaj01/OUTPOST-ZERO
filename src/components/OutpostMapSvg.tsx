@@ -52,47 +52,47 @@ export const OutpostMapSvg: React.FC<OutpostMapSvgProps> = ({
   };
 
   return (
-    <div className="relative w-full rounded-2xl bg-space-950/90 border border-slate-800 p-3 sm:p-5 overflow-hidden shadow-2xl backdrop-blur-md">
+    <div className="relative w-full clean-card p-3.5 sm:p-4 overflow-hidden shadow-card">
       {/* HUD Header Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-2 mb-3 pb-2 border-b border-slate-800/80">
+      <div className="flex flex-wrap items-center justify-between gap-2 mb-3 pb-2.5 border-b border-slate-800">
         <div className="flex items-center gap-2">
-          <span className="w-2.5 h-2.5 rounded-full bg-cyan-neon animate-ping" aria-hidden="true" />
-          <h3 className="text-sm font-bold tracking-wider uppercase text-cyan-300 font-mono">
-            {isCadet ? '🗺️ Outpost Base & Site Telemetry' : 'Outpost Architectural Schematic & NASA Orbital Telemetry'}
+          <span className="w-2 h-2 rounded-full bg-sky-400" aria-hidden="true" />
+          <h3 className="text-xs sm:text-sm font-bold tracking-wide uppercase text-slate-200 font-mono">
+            {isCadet ? '🗺️ Outpost Habitat & Site View' : 'Outpost Architectural Schematic & NASA Orbital Telemetry'}
           </h3>
         </div>
 
         {/* View Switcher: Architectural Schematic vs NASA Orbital Context Map */}
-        <div className="flex items-center gap-1.5 p-1 rounded-lg bg-space-900 border border-slate-700 text-xs font-mono">
+        <div className="flex items-center gap-1 p-1 rounded-lg bg-space-950 border border-slate-800 text-xs font-mono">
           <button
             onClick={() => setActiveView('schematic')}
             className={`px-2.5 py-1 rounded transition-colors ${
               activeView === 'schematic'
-                ? 'bg-cyan-500/20 text-cyan-neon border border-cyan-500/40 font-bold'
+                ? 'bg-sky-500/15 text-sky-300 border border-sky-500/30 font-semibold'
                 : 'text-slate-400 hover:text-slate-200'
             }`}
           >
-            📐 Habitat Cross-Section
+            📐 Habitat View
           </button>
           <button
             onClick={() => setActiveView('orbital_map')}
             className={`px-2.5 py-1 rounded transition-colors ${
               activeView === 'orbital_map'
-                ? 'bg-cyan-500/20 text-cyan-neon border border-cyan-500/40 font-bold'
+                ? 'bg-sky-500/15 text-sky-300 border border-sky-500/30 font-semibold'
                 : 'text-slate-400 hover:text-slate-200'
             }`}
           >
-            🛰️ {isMoon ? 'NASA LRO Illumination Map' : 'NASA MRO Jezero Delta Map'}
+            🛰️ {isMoon ? 'NASA LRO Map' : 'NASA MRO Map'}
           </button>
         </div>
       </div>
 
       {/* Conceptual Illustration Notice Banner */}
       <div className="mb-2 text-[10px] font-mono text-slate-400 flex items-center justify-between flex-wrap gap-1">
-        <span className="text-cyan-300/80">
-          * Conceptual Educational Outpost Illustration (Not an official NASA or ISRO habitat drawing)
+        <span className="text-sky-300/80">
+          * Conceptual Educational Illustration (Click modules to inspect subsystem data)
         </span>
-        <span className="text-slate-400">Click any habitat module to inspect telemetry</span>
+        <span className="text-slate-400">Interactive diagram</span>
       </div>
 
       {/* VIEW 1: ARCHITECTURAL SCHEMATIC */}

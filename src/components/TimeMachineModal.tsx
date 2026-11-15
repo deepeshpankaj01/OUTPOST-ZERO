@@ -34,7 +34,7 @@ export const TimeMachineModal: React.FC<TimeMachineModalProps> = ({
       aria-labelledby="time-machine-title"
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-space-950/90 backdrop-blur-md animate-in fade-in duration-200"
     >
-      <div className="relative w-full max-w-2xl rounded-2xl bg-space-900 border-2 border-cyan-400/80 shadow-cyan-glow p-6 sm:p-8 my-auto">
+      <div className="relative w-full max-w-2xl rounded-2xl bg-space-900 border border-sky-500/40 shadow-2xl p-6 sm:p-7 my-auto">
         {/* Header */}
         <div className="flex items-center gap-3 mb-4 pb-3 border-b border-slate-700">
           <div className="w-10 h-10 rounded-xl bg-cyan-950 border border-cyan-500/60 flex items-center justify-center text-xl" aria-hidden="true">

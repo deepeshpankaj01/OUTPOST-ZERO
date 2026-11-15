@@ -53,21 +53,21 @@ export const TelemetryCharts: React.FC<TelemetryChartsProps> = ({ history, mode 
   }));
 
   return (
-    <div className="rounded-2xl bg-space-900/90 border border-slate-800 p-4 sm:p-6 shadow-xl backdrop-blur-md">
+    <div className="clean-card p-3.5 sm:p-4 shadow-card">
       {/* Header & Tabs */}
-      <div className="flex flex-wrap items-center justify-between gap-3 mb-4 pb-3 border-b border-slate-800">
+      <div className="flex flex-wrap items-center justify-between gap-2 mb-3 pb-2.5 border-b border-slate-800">
         <div>
-          <h3 className="text-sm sm:text-base font-bold text-white flex items-center gap-2">
+          <h3 className="text-xs sm:text-sm font-bold text-white flex items-center gap-1.5 tracking-wide">
             <span>📈</span>
             <span>
               {isCadet
-                ? 'Outpost Mission Telemetry (Sols Progress)'
-                : 'Real-Time Subsystem Telemetry & Trend Logs'}
+                ? 'Mission Telemetry Trends'
+                : 'Real-Time Subsystem Telemetry Logs'}
             </span>
           </h3>
-          <p className="text-xs text-slate-400">
+          <p className="text-[11px] text-slate-400 mt-0.5">
             {isCadet
-              ? 'Watch how your decisions affected the base over every Sol!'
+              ? 'Track how your decisions affected the base across each Sol.'
               : 'Multi-channel historical telemetry across EPS, ECLSS, TCS, and Human Factors.'}
           </p>
         </div>
@@ -76,43 +76,43 @@ export const TelemetryCharts: React.FC<TelemetryChartsProps> = ({ history, mode 
         <div className="flex flex-wrap gap-1 p-1 bg-space-950 rounded-lg border border-slate-800 text-xs font-mono">
           <button
             onClick={() => setActiveTab('power')}
-            className={`px-3 py-1.5 rounded-md transition-all ${
+            className={`px-2.5 py-1 rounded transition-all ${
               activeTab === 'power'
-                ? 'bg-cyan-500/20 text-cyan-neon border border-cyan-500/50'
+                ? 'bg-sky-500/15 text-sky-300 border border-sky-500/30 font-semibold'
                 : 'text-slate-400 hover:text-slate-200'
             }`}
           >
-            ⚡ {isCadet ? 'Battery & Power' : 'EPS & Storage'}
+            ⚡ {isCadet ? 'Power' : 'EPS'}
           </button>
           <button
             onClick={() => setActiveTab('eclss')}
-            className={`px-3 py-1.5 rounded-md transition-all ${
+            className={`px-2.5 py-1 rounded transition-all ${
               activeTab === 'eclss'
-                ? 'bg-emerald-500/20 text-emerald-neon border border-emerald-500/50'
+                ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 font-semibold'
                 : 'text-slate-400 hover:text-slate-200'
             }`}
           >
-            🌬️ {isCadet ? 'Oxygen & Water' : 'ECLSS Reserves'}
+            🌬️ {isCadet ? 'Air & Water' : 'ECLSS'}
           </button>
           <button
             onClick={() => setActiveTab('thermal')}
-            className={`px-3 py-1.5 rounded-md transition-all ${
+            className={`px-2.5 py-1 rounded transition-all ${
               activeTab === 'thermal'
-                ? 'bg-amber-500/20 text-amber-neon border border-amber-500/50'
+                ? 'bg-amber-500/15 text-amber-300 border border-amber-500/30 font-semibold'
                 : 'text-slate-400 hover:text-slate-200'
             }`}
           >
-            🌡️ {isCadet ? 'Temp & Radiation' : 'TCS & Dosimetry'}
+            🌡️ {isCadet ? 'Temp & Rad' : 'TCS'}
           </button>
           <button
             onClick={() => setActiveTab('morale')}
-            className={`px-3 py-1.5 rounded-md transition-all ${
+            className={`px-2.5 py-1 rounded transition-all ${
               activeTab === 'morale'
-                ? 'bg-purple-500/20 text-purple-300 border border-purple-500/50'
+                ? 'bg-purple-500/15 text-purple-300 border border-purple-500/30 font-semibold'
                 : 'text-slate-400 hover:text-slate-200'
             }`}
           >
-            😊 {isCadet ? 'Crew Morale' : 'Human Factors'}
+            😊 {isCadet ? 'Morale' : 'Morale'}
           </button>
         </div>
       </div>

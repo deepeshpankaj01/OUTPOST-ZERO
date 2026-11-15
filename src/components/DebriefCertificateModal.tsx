@@ -92,7 +92,7 @@ export const DebriefCertificateModal: React.FC<DebriefCertificateModalProps> = (
       aria-labelledby="certificate-title"
       className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-space-950/90 backdrop-blur-md overflow-y-auto animate-in fade-in duration-200"
     >
-      <div className="relative w-full max-w-3xl rounded-2xl bg-space-900 border-2 border-cyan-400 shadow-cyan-glow p-5 sm:p-8 my-auto text-white">
+      <div className="relative w-full max-w-3xl rounded-2xl bg-space-900 border border-sky-400/40 shadow-2xl p-5 sm:p-7 my-auto text-white">
         {/* Certificate Decorative Border Container */}
         <div className="p-4 sm:p-6 rounded-xl border border-cyan-500/40 bg-gradient-to-b from-space-950/90 to-space-900/90 relative overflow-hidden">
           {/* Watermark Patch */}

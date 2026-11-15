@@ -10,37 +10,45 @@ const config: Config = {
     extend: {
       colors: {
         space: {
-          950: "#040711",
-          900: "#070B19",
-          850: "#0B1126",
-          800: "#0F1734",
-          700: "#18224B",
-          600: "#243269",
+          950: "#060A17", // Deepest space navy background
+          900: "#0B1226", // Deep space navy canvas
+          850: "#101B36", // Clean card surface
+          800: "#17254A", // Elevated surface / hover
+          700: "#223566", // Borders and dividers
+          600: "#324B8C", // Subtle active borders
+        },
+        navy: {
+          950: "#060A17",
+          900: "#0B1226",
+          850: "#101B36",
+          800: "#17254A",
+          700: "#223566",
+        },
+        surface: {
+          base: "#060A17",
+          card: "#0E1730",
+          cardHover: "#131F3F",
+          border: "#1C2C54",
+          borderLight: "#2A3F74",
         },
         cyan: {
-          neon: "#00F0FF",
-          glow: "#38bdf8",
-        },
-        emerald: {
-          neon: "#10B981",
-        },
-        amber: {
-          neon: "#F59E0B",
+          neon: "#38BDF8", // Refined subtle cyan (Sky-400), softer and more readable
+          glow: "#0EA5E9",
         },
         coral: {
-          neon: "#EF4444",
+          neon: "#F87171",
         },
       },
       boxShadow: {
-        "cyan-glow": "0 0 15px -3px rgba(0, 240, 255, 0.45), 0 0 6px -2px rgba(0, 240, 255, 0.3)",
-        "emerald-glow": "0 0 15px -3px rgba(16, 185, 129, 0.45), 0 0 6px -2px rgba(16, 185, 129, 0.3)",
-        "amber-glow": "0 0 15px -3px rgba(245, 158, 11, 0.45), 0 0 6px -2px rgba(245, 158, 11, 0.3)",
-        "coral-glow": "0 0 15px -3px rgba(239, 68, 68, 0.5), 0 0 6px -2px rgba(239, 68, 68, 0.3)",
+        "subtle": "0 2px 10px rgba(0, 0, 0, 0.35)",
+        "card": "0 4px 20px -2px rgba(3, 7, 18, 0.6)",
+        "card-hover": "0 8px 30px -4px rgba(3, 7, 18, 0.75)",
+        "cyan-glow": "0 0 12px -2px rgba(56, 189, 248, 0.25)",
+        "amber-glow": "0 0 12px -2px rgba(245, 158, 11, 0.25)",
       },
       animation: {
         "pulse-slow": "pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite",
-        "radar-sweep": "spin 8s linear infinite",
-        "orbit": "spin 20s linear infinite",
+        "spin-slow": "spin 12s linear infinite",
       },
     },
   },

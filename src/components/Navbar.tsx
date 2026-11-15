@@ -51,64 +51,72 @@ export const Navbar: React.FC<NavbarProps> = ({
   const isCadet = mode === 'cadet';
 
   return (
-    <header className="sticky top-0 z-40 w-full bg-space-950/90 border-b border-slate-800/80 backdrop-blur-md">
+    <header className="sticky top-0 z-40 w-full bg-space-950/95 border-b border-slate-800/80 backdrop-blur-md">
       <div className="max-w-7xl mx-auto px-3 sm:px-6 py-2.5 flex flex-wrap items-center justify-between gap-3">
-        {/* Left: Mission Patch Logo & Title */}
+        {/* Left: Brand Identity & Sol Progress */}
         <div className="flex items-center gap-3">
-          <MissionPatchBadge size={44} />
+          <MissionPatchBadge size={40} />
           <div>
             <div className="flex items-center gap-2">
-              <span className="font-black text-base sm:text-lg tracking-wider text-white font-mono flex items-center gap-1.5">
-                <span>OUTPOST ZERO</span>
+              <span className="font-extrabold text-base sm:text-lg tracking-wide text-white font-mono">
+                OUTPOST ZERO
               </span>
-              <span className="px-1.5 py-0.5 text-[9px] font-mono uppercase rounded bg-cyan-950 text-cyan-300 border border-cyan-800/60 hidden sm:inline">
+              <span className="px-1.5 py-0.5 text-[10px] font-mono font-semibold rounded bg-sky-500/10 text-sky-400 border border-sky-500/20 hidden sm:inline">
                 Team Parakram
               </span>
             </div>
-            <div className="text-[11px] font-mono text-slate-400 flex items-center gap-1">
-              <span>Junior Astronaut Mission Trainer</span>
+            <div className="text-[11px] text-slate-400 flex items-center gap-1.5">
+              <span>Junior Astronaut Trainer</span>
               <span className="text-slate-600">•</span>
-              <span className="text-cyan-400 font-bold">SOL {currentSol}/{maxSols}</span>
+              <span className="px-1.5 py-0.2 rounded font-mono font-bold text-sky-400 bg-slate-900 border border-slate-800 text-[10px]">
+                SOL {currentSol} / {maxSols}
+              </span>
             </div>
           </div>
         </div>
 
-        {/* Center: Mission Selector Buttons */}
-        <div className="flex items-center gap-1.5 p-1 rounded-xl bg-space-900 border border-slate-800 text-xs font-mono">
+        {/* Center: Mission Destination Selector */}
+        <div
+          role="radiogroup"
+          aria-label="Select Mission Destination"
+          className="flex items-center p-1 rounded-xl bg-space-900 border border-slate-800 text-xs font-medium"
+        >
           <button
+            role="radio"
+            aria-checked={currentMissionId === 'moon_shackleton'}
             onClick={() => {
               audioEngine.playClick();
               onSelectMission('moon_shackleton');
             }}
-            aria-label="Select Shackleton Rim Outpost Moon Mission"
-            className={`px-2.5 sm:px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-all focus:ring-1 focus:ring-cyan-400 ${
+            className={`px-3 py-1.5 rounded-lg flex items-center gap-2 transition-all focus:outline-none focus:ring-1 focus:ring-sky-400 ${
               currentMissionId === 'moon_shackleton'
-                ? 'bg-cyan-500/20 text-cyan-neon border border-cyan-500/50 shadow-cyan-glow/20 font-bold'
+                ? 'bg-sky-500/15 text-sky-300 border border-sky-500/30 font-semibold shadow-sm'
                 : 'text-slate-400 hover:text-slate-200'
             }`}
           >
-            <span>🌕</span>
-            <span className="hidden xs:inline sm:inline">Moon: Shackleton</span>
+            <span aria-hidden="true" className="text-sm">🌕</span>
+            <span>Moon <span className="hidden md:inline font-normal text-slate-400">(Shackleton)</span></span>
           </button>
 
           <button
+            role="radio"
+            aria-checked={currentMissionId === 'mars_jezero'}
             onClick={() => {
               audioEngine.playClick();
               onSelectMission('mars_jezero');
             }}
-            aria-label="Select Jezero Crater Habitat Mars Mission"
-            className={`px-2.5 sm:px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-all focus:ring-1 focus:ring-coral-400 ${
+            className={`px-3 py-1.5 rounded-lg flex items-center gap-2 transition-all focus:outline-none focus:ring-1 focus:ring-orange-400 ${
               currentMissionId === 'mars_jezero'
-                ? 'bg-coral-500/20 text-coral-neon border border-coral-500/50 shadow-coral-glow/20 font-bold'
+                ? 'bg-orange-500/15 text-orange-300 border border-orange-500/30 font-semibold shadow-sm'
                 : 'text-slate-400 hover:text-slate-200'
             }`}
           >
-            <span>🔴</span>
-            <span className="hidden xs:inline sm:inline">Mars: Jezero</span>
+            <span aria-hidden="true" className="text-sm">🔴</span>
+            <span>Mars <span className="hidden md:inline font-normal text-slate-400">(Jezero)</span></span>
           </button>
         </div>
 
-        {/* Right Controls: Audience Mode, DONKI, Audio Mute, Science Lab */}
+        {/* Right Controls: Mode Toggle, DONKI, Modals, Sound */}
         <div className="flex items-center gap-2">
           {/* DONKI Space Weather Pill */}
           <DonkiStatusPill
@@ -124,7 +132,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 audioEngine.playClick();
                 onOpenBriefing();
               }}
-              className="p-1.5 sm:px-2.5 sm:py-1 rounded-lg text-xs font-mono bg-space-850 hover:bg-space-800 text-cyan-300 border border-cyan-500/30 flex items-center gap-1 transition-all focus:ring-1 focus:ring-cyan-400"
+              className="px-2.5 py-1.5 rounded-lg text-xs font-medium bg-space-900 hover:bg-space-850 text-slate-300 border border-slate-800 hover:border-slate-700 flex items-center gap-1.5 transition-all focus:ring-1 focus:ring-sky-400"
               title="Open Mission Briefing and Objectives"
               aria-label="Open Mission Briefing"
             >
@@ -139,17 +147,17 @@ export const Navbar: React.FC<NavbarProps> = ({
               audioEngine.playClick();
               onToggleMode();
             }}
-            aria-label={`Toggle mode. Current mode: ${isCadet ? 'Cadet Mode' : 'Flight Director Mode'}`}
-            className={`px-2.5 py-1 rounded-lg text-xs font-mono font-bold border transition-all flex items-center gap-1.5 focus:ring-1 focus:ring-cyan-400 ${
+            aria-label={`Current Mode: ${isCadet ? 'Cadet Mode (Ages 7-12)' : 'Flight Director Mode (Ages 13+)'}. Click to switch.`}
+            className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold border transition-all flex items-center gap-1.5 focus:ring-1 focus:ring-sky-400 ${
               isCadet
-                ? 'bg-gradient-to-r from-amber-500/20 to-yellow-500/20 text-amber-300 border-amber-500/40 hover:border-amber-400'
-                : 'bg-gradient-to-r from-cyan-500/20 to-blue-500/20 text-cyan-neon border-cyan-500/40 hover:border-cyan-400'
+                ? 'bg-amber-500/10 text-amber-300 border-amber-500/30 hover:border-amber-400/50'
+                : 'bg-sky-500/10 text-sky-300 border-sky-500/30 hover:border-sky-400/50'
             }`}
-            title="Toggle between Cadet Mode (Ages 7-12) and Flight Director Mode (Ages 13+ / Classroom & Judges)"
+            title="Toggle between Cadet Mode (simplified) and Flight Director Mode (engineering metrics)"
           >
             <span aria-hidden="true">{isCadet ? '🧒' : '🚀'}</span>
             <span className="hidden sm:inline">
-              {isCadet ? 'Cadet Mode (7-12)' : 'Flight Director (13+)'}
+              {isCadet ? 'Cadet (7–12)' : 'Director (13+)'}
             </span>
           </button>
 
@@ -160,7 +168,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               onOpenScienceLab();
             }}
             aria-label="Open NASA and ISRO Science Lab and Provenance Registry"
-            className="p-1.5 sm:px-2.5 sm:py-1 rounded-lg text-xs font-mono bg-space-850 hover:bg-space-800 text-purple-300 border border-purple-500/30 flex items-center gap-1 transition-all focus:ring-1 focus:ring-purple-400"
+            className="px-2.5 py-1.5 rounded-lg text-xs font-medium bg-space-900 hover:bg-space-850 text-slate-300 border border-slate-800 hover:border-slate-700 flex items-center gap-1.5 transition-all focus:ring-1 focus:ring-sky-400"
             title="Open NASA & ISRO Science Lab, Provenance Registry & Lesson Plan"
           >
             <span aria-hidden="true">🔬</span>
@@ -171,8 +179,8 @@ export const Navbar: React.FC<NavbarProps> = ({
           <button
             onClick={handleToggleMute}
             aria-label={isMuted ? 'Unmute Web Audio Synthesizer' : 'Mute Web Audio Synthesizer'}
-            className="p-1.5 rounded-lg bg-space-850 hover:bg-space-800 text-slate-300 border border-slate-700 hover:text-white transition-all text-xs focus:ring-1 focus:ring-slate-400"
-            title={isMuted ? 'Unmute Web Audio Synthesizer' : 'Mute Web Audio Synthesizer'}
+            className="p-1.5 sm:px-2 rounded-lg bg-space-900 hover:bg-space-850 text-slate-400 hover:text-white border border-slate-800 transition-all text-xs focus:ring-1 focus:ring-slate-400"
+            title={isMuted ? 'Unmute Sound' : 'Mute Sound'}
           >
             {isMuted ? '🔇' : '🔊'}
           </button>

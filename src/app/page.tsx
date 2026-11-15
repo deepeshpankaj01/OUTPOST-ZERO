@@ -33,11 +33,10 @@ import { audioEngine } from '../lib/audioEngine';
 import { Navbar } from '../components/Navbar';
 import { Footer } from '../components/Footer';
 import { CommanderAria } from '../components/CommanderAria';
-import { OutpostMapSvg } from '../components/OutpostMapSvg';
+import { VitalResourcesBar } from '../components/VitalResourcesBar';
 import { AllocationSliders } from '../components/AllocationSliders';
 import { PreFlightCalculator } from '../components/PreFlightCalculator';
-import { TelemetryCharts } from '../components/TelemetryCharts';
-import { AstroProfileCard } from '../components/AstroProfileCard';
+import { OutpostConsoleTabs } from '../components/OutpostConsoleTabs';
 import { CrisisModal } from '../components/CrisisModal';
 import { TimeMachineModal } from '../components/TimeMachineModal';
 import { DebriefCertificateModal } from '../components/DebriefCertificateModal';
@@ -409,35 +408,43 @@ export default function MissionControlPage() {
       />
 
       {/* Main Content Area */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 py-6 space-y-6">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 py-4 sm:py-6 space-y-4 sm:space-y-5">
         {/* Persistent Educational Notice Banner */}
-        <div className="p-3 rounded-xl bg-amber-950/25 border border-amber-500/30 text-amber-200/90 text-xs font-sans flex items-start gap-2 shadow-sm">
-          <span className="text-amber-400 text-sm" aria-hidden="true">⚠️</span>
-          <div>
-            <strong>Persistent Notice:</strong> OUTPOST ZERO is an educational simulation, not an engineering design tool, flight procedure, radiation safety assessment, or NASA/ISRO-endorsed product.
+        <div className="py-2 px-3.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs font-sans flex items-center justify-between gap-2 shadow-sm">
+          <div className="flex items-center gap-2">
+            <span className="text-amber-400 text-sm" aria-hidden="true">⚠️</span>
+            <span>
+              <strong>Educational Simulation:</strong> Grounded in NASA-STD-3001, ISS ECLSS, ISRO ChaSTE (69.37°S), and NASA MOXIE/MEDA data. Not a certified flight procedure.
+            </span>
           </div>
+          <button
+            onClick={() => setShowScienceLab(true)}
+            className="text-[11px] font-mono text-amber-300 hover:text-white underline flex-shrink-0"
+          >
+            Science Provenance ➔
+          </button>
         </div>
 
-        {/* Mission Briefing Banner */}
+        {/* Mission Briefing Header & Environmental Context */}
         <section
           aria-label="Mission Briefing and Environmental Conditions"
-          className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-space-900 via-space-850 to-space-900 border border-slate-800 p-4 sm:p-6 shadow-xl"
+          className="clean-card p-4 sm:p-5 shadow-card"
         >
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
             <div className="space-y-1">
               <div className="flex flex-wrap items-center gap-2">
-                <span className="px-2.5 py-0.5 rounded text-[11px] font-mono font-bold bg-cyan-950 text-cyan-300 border border-cyan-800/60">
+                <span className="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-sky-500/15 text-sky-300 border border-sky-500/30">
                   {mission.destination}
                 </span>
                 <span className="text-xs font-mono text-slate-400">
-                  Site: <strong>{mission.destinationName}</strong>
+                  Site: <strong className="text-slate-200">{mission.destinationName}</strong>
                 </span>
-                <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-amber-950/80 text-amber-300 border border-amber-800/50">
+                <span className="px-2 py-0.5 rounded text-[11px] font-mono bg-amber-500/15 text-amber-300 border border-amber-500/30">
                   {envModifiers.statusNote}
                 </span>
               </div>
 
-              <h1 className="text-xl sm:text-2xl md:text-3xl font-black text-white tracking-wide">
+              <h1 className="text-lg sm:text-2xl font-black text-white tracking-wide">
                 {isCadet ? mission.cadetName : mission.name}
               </h1>
 
@@ -447,15 +454,15 @@ export default function MissionControlPage() {
             </div>
 
             {/* Quick Stats Pill Group */}
-            <div className="flex flex-wrap md:flex-col gap-2 font-mono text-xs text-right">
+            <div className="flex flex-wrap md:flex-col gap-2 font-mono text-xs text-right flex-shrink-0">
               <div className="px-3 py-1.5 rounded-lg bg-space-950 border border-slate-800">
-                <div className="text-[10px] uppercase text-slate-400">Solar Flux</div>
-                <div className="text-cyan-neon font-bold">
+                <div className="text-[10px] uppercase text-slate-400">Solar Irradiance</div>
+                <div className="text-sky-300 font-bold">
                   {mission.solarIrradianceWPerM2} W/m²
                 </div>
               </div>
               <div className="px-3 py-1.5 rounded-lg bg-space-950 border border-slate-800">
-                <div className="text-[10px] uppercase text-slate-400">Base Temp</div>
+                <div className="text-[10px] uppercase text-slate-400">Base Surface Temp</div>
                 <div className="text-amber-400 font-bold">
                   {mission.baselineSurfaceTempC}°C
                 </div>
@@ -464,7 +471,7 @@ export default function MissionControlPage() {
           </div>
         </section>
 
-        {/* Commander Aria Mentor Card */}
+        {/* Commander Aria Mentor Guidance */}
         <section aria-label="Commander Aria Mentor Guidance">
           <CommanderAria
             mode={mode}
@@ -482,53 +489,53 @@ export default function MissionControlPage() {
           />
         </section>
 
-        {/* Interactive SVG Outpost Map */}
-        <section aria-label="Interactive Habitat Schematic and Site Imagery">
-          <OutpostMapSvg
-            mission={mission}
-            resources={resources}
-            allocations={allocations}
-            crew={crew}
-            mode={mode}
-            selectedModule={selectedModule}
-            onSelectModule={(id) => setSelectedModule(id)}
-          />
-        </section>
+        {/* Vital Resources Status Bar (Power, Oxygen, Water, Temperature) */}
+        <VitalResourcesBar
+          resources={resources}
+          mode={mode}
+          onOpenScienceLab={() => setShowScienceLab(true)}
+        />
 
-        {/* Pre-Flight Calculator & Deltas Preview */}
-        <section aria-label="Pre-Flight Consequence Preview Calculator">
-          <PreFlightCalculator
-            deltas={preFlightDeltas}
-            currentResources={resources}
-            currentSol={currentSol}
-            maxSols={mission.missionDurationSols}
-            mode={mode}
-            onAdvanceSol={handleAdvanceSol}
-            onResetToBaseline={handleResetToBaseline}
-          />
-        </section>
+        {/* Main 2-Column Command Workspace */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5 items-start">
+          {/* Left Column: Subsystem Power Controls & Consequence Preview (7 cols) */}
+          <div className="lg:col-span-7 space-y-4">
+            {/* 4 Power Allocation Sliders */}
+            <AllocationSliders
+              mission={mission}
+              allocations={allocations}
+              availablePowerKw={powerGen.totalKw}
+              mode={mode}
+              onChange={(newAlloc) => setAllocations(newAlloc)}
+              focusedSlider={selectedModule}
+            />
 
-        {/* 4 Engineering Allocation Sliders */}
-        <section aria-label="Electrical Power Allocation Controls">
-          <AllocationSliders
-            mission={mission}
-            allocations={allocations}
-            availablePowerKw={powerGen.totalKw}
-            mode={mode}
-            onChange={(newAlloc) => setAllocations(newAlloc)}
-            focusedSlider={selectedModule}
-          />
-        </section>
+            {/* Pre-Flight Calculator & Deltas Preview */}
+            <PreFlightCalculator
+              deltas={preFlightDeltas}
+              currentResources={resources}
+              currentSol={currentSol}
+              maxSols={mission.missionDurationSols}
+              mode={mode}
+              onAdvanceSol={handleAdvanceSol}
+              onResetToBaseline={handleResetToBaseline}
+            />
+          </div>
 
-        {/* Crew & Player Profile Badges */}
-        <section aria-label="Crew Status and Morale">
-          <AstroProfileCard crew={crew} mode={mode} />
-        </section>
-
-        {/* Multi-Channel Telemetry Historical Charts */}
-        <section aria-label="Subsystem Telemetry History Charts">
-          <TelemetryCharts history={history} mode={mode} />
-        </section>
+          {/* Right Column: Outpost Intel & Visualizer Console (5 cols) */}
+          <div className="lg:col-span-5 space-y-4">
+            <OutpostConsoleTabs
+              mission={mission}
+              resources={resources}
+              allocations={allocations}
+              crew={crew}
+              history={history}
+              mode={mode}
+              selectedModule={selectedModule}
+              onSelectModule={(id) => setSelectedModule(id)}
+            />
+          </div>
+        </div>
       </main>
 
       {/* Footer */}

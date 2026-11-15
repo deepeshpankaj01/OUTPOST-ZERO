@@ -20,11 +20,11 @@ export const AstroProfileCard: React.FC<AstroProfileCardProps> = ({ crew, mode }
   };
 
   return (
-    <div className="rounded-2xl bg-space-900/90 border border-slate-800 p-4 sm:p-5 shadow-xl backdrop-blur-md">
+    <div className="clean-card p-3.5 sm:p-4 shadow-card">
       <div className="flex flex-wrap items-center justify-between gap-2 mb-3 pb-2 border-b border-slate-800">
         <div className="flex items-center gap-2">
-          <span className="text-base">👨‍🚀</span>
-          <h4 className="text-sm font-bold text-white font-mono uppercase tracking-wide">
+          <span className="text-base" aria-hidden="true">👨‍🚀</span>
+          <h4 className="text-xs sm:text-sm font-bold text-white tracking-wide">
             {isCadet ? 'Astronaut Crew & Morale' : 'Crew Human Factors & Flight Roster'}
           </h4>
         </div>
@@ -35,7 +35,7 @@ export const AstroProfileCard: React.FC<AstroProfileCardProps> = ({ crew, mode }
             return (
               <span
                 key={badgeId}
-                className="px-2 py-0.5 rounded bg-space-950 border border-amber-500/40 text-[10px] font-mono text-amber-300 flex items-center gap-1"
+                className="px-2 py-0.5 rounded-md bg-space-950 border border-amber-500/30 text-[10px] font-mono text-amber-300 flex items-center gap-1"
                 title={b.label}
               >
                 <span>{b.icon}</span>
@@ -47,16 +47,16 @@ export const AstroProfileCard: React.FC<AstroProfileCardProps> = ({ crew, mode }
       </div>
 
       {/* Crew Members Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
         {crew.map((member) => (
           <div
             key={member.id}
-            className="p-3 rounded-xl bg-space-950/80 border border-slate-800 flex flex-col justify-between"
+            className="clean-card-subtle p-3 flex flex-col justify-between"
           >
             <div>
               <div className="flex items-center gap-2 mb-1">
                 <span
-                  className="w-3 h-3 rounded-full border border-white/40"
+                  className="w-2.5 h-2.5 rounded-full border border-white/40 flex-shrink-0"
                   style={{ backgroundColor: member.avatarColor }}
                 />
                 <span className="font-bold text-xs text-white truncate">
@@ -74,10 +74,10 @@ export const AstroProfileCard: React.FC<AstroProfileCardProps> = ({ crew, mode }
                 <span
                   className={
                     member.morale > 70
-                      ? 'text-emerald-400'
+                      ? 'text-emerald-400 font-semibold'
                       : member.morale > 40
-                      ? 'text-amber-400'
-                      : 'text-coral-neon'
+                      ? 'text-amber-400 font-semibold'
+                      : 'text-rose-400 font-semibold'
                   }
                 >
                   {member.morale}%
@@ -85,7 +85,7 @@ export const AstroProfileCard: React.FC<AstroProfileCardProps> = ({ crew, mode }
               </div>
 
               {/* Morale Progress Bar */}
-              <div className="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
+              <div className="w-full h-1.5 bg-slate-900 rounded-full overflow-hidden border border-slate-800">
                 <div
                   className="h-full rounded-full transition-all duration-300"
                   style={{
@@ -97,7 +97,7 @@ export const AstroProfileCard: React.FC<AstroProfileCardProps> = ({ crew, mode }
 
               <div className="flex justify-between text-[10px] font-mono pt-0.5">
                 <span className="text-slate-400">Status</span>
-                <span className="text-cyan-300 font-bold">{member.status}</span>
+                <span className="text-sky-300 font-medium">{member.status}</span>
               </div>
             </div>
           </div>

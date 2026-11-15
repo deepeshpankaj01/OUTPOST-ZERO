@@ -22,11 +22,11 @@ export const Footer: React.FC<FooterProps> = ({ onOpenScienceLab, onOpenBriefing
         </div>
 
         {/* Super Intelligence (SI) Disclosure & Compliance Badge */}
-        <div className="p-4 rounded-xl bg-space-900 border border-cyan-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-lg">
+        <div className="p-4 rounded-xl bg-space-900 border border-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-sm">
           <div className="flex items-start gap-3">
             <span className="text-xl sm:text-2xl mt-0.5" aria-hidden="true">🤖</span>
             <div>
-              <div className="font-bold text-xs uppercase font-mono text-cyan-neon">
+              <div className="font-bold text-xs uppercase font-mono text-sky-400">
                 Super Intelligence (SI) Transparency &amp; Compliance Disclosure
               </div>
               <p className="text-xs text-slate-300 mt-0.5 leading-relaxed">
@@ -36,7 +36,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenScienceLab, onOpenBriefing
           </div>
 
           <div className="flex items-center gap-2 flex-shrink-0">
-            <span className="px-2.5 py-1 rounded-md text-[10px] font-mono uppercase bg-cyan-950 text-cyan-300 border border-cyan-800/60">
+            <span className="px-2.5 py-1 rounded-md text-[10px] font-mono uppercase bg-sky-500/10 text-sky-300 border border-sky-500/25">
               NASA Space Apps 2026 Compliant
             </span>
           </div>
